@@ -198,6 +198,9 @@
     # automatically after a crash.
     startup_notification = false
 
+    # window corners
+    corner = 0
+
     ### Legacy
 
     # Use the Xinerama extension instead of RandR for multi-monitor support.

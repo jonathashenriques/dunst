@@ -335,6 +335,12 @@ void load_settings(char *cmdline_config_path)
                 "Transparency. range 0-100"
         );
 
+        settings.corner_radius = option_get_int(
+                "global",
+                "corner", "-corner", defaults.corner_radius,
+                "Window corner radius"
+        );
+
         {
                 char *c = option_get_string(
                         "global",

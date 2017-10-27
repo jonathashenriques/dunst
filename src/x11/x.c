@@ -187,7 +187,8 @@ static bool have_dynamic_width(void)
         return (xctx.geometry.mask & WidthValue && xctx.geometry.w == 0);
 }
 
-static bool does_file_exist(const char *filename){
+static bool does_file_exist(const char *filename)
+{
         return (access(filename, F_OK) != -1);
 }
 
@@ -702,6 +703,7 @@ void x_win_draw(void)
         cairo_surface_destroy(image_surface);
         r_free_layouts(layouts);
 
+        x_win_round_corners();
 }
 
 static void x_win_move(int width, int height)
@@ -1015,6 +1017,41 @@ void x_setup(void)
         x_cairo_setup();
         x_shortcut_grab(&settings.history_ks);
 
+}
+
+void x_win_round_corners(void)
+{
+        XWindowAttributes win_attr;
+        XGetWindowAttributes(xctx.dpy, xctx.win, &win_attr);
+
+        int width = win_attr.width + win_attr.border_width;
+        int height = win_attr.height + win_attr.border_width;
+
+        Pixmap mask = XCreatePixmap(xctx.dpy, xctx.win, width, height, 1);
+        XGCValues xgcv;
+
+        GC shape_gc = XCreateGC(xctx.dpy, mask, 0, &xgcv);
+
+        int rad = settings.corner_radius;
+        int dia = 2 * rad;
+
+        XSetForeground(xctx.dpy, shape_gc, 0);
+        XFillRectangle(xctx.dpy, mask, shape_gc, 0, 0, width, height);
+
+        XSetForeground(xctx.dpy, shape_gc, 1);
+
+        XFillArc(xctx.dpy, mask, shape_gc, 0, 0, dia, dia, 0, 23040);
+        XFillArc(xctx.dpy, mask, shape_gc, width-dia-1, 0, dia, dia, 0, 23040);
+        XFillArc(xctx.dpy, mask, shape_gc, 0, height-dia-1, dia, dia, 0, 23040);
+        XFillArc(xctx.dpy, mask, shape_gc, width-dia-1, height-dia-1, dia, dia,
+                0, 23040);
+
+        XFillRectangle(xctx.dpy, mask, shape_gc, rad, 0, width-dia, height);
+        XFillRectangle(xctx.dpy, mask, shape_gc, 0, rad, width, height-dia);
+
+        XShapeCombineMask(xctx.dpy, xctx.win, ShapeBounding, 0, 0, mask, ShapeSet);
+
+        XFreePixmap(xctx.dpy, mask);
 }
 
 static void x_set_wm(Window win)

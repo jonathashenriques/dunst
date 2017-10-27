@@ -23,7 +23,8 @@ pkg_config_packs := dbus-1 \
                     x11 \
                     xinerama \
                     xrandr \
-                    xscrnsaver
+                    xscrnsaver \
+					xext
 
 # check if we need libxdg-basedir
 ifeq (,$(findstring STATIC_CONFIG,$(CFLAGS)))
