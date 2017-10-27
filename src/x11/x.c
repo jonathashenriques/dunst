@@ -584,14 +584,45 @@ static dimension_t x_render_layout(cairo_t *c, colored_layout *cl, colored_layou
         int bg_height = MAX(settings.notification_height, (2 * settings.padding) + h);
         double bg_half_height = settings.notification_height/2.0;
         int pango_offset = (int) floor(h/2.0);
+        double degrees = M_PI / 180.0;
 
         if (first) bg_height += settings.frame_width;
         if (last) bg_height += settings.frame_width;
         else bg_height += settings.separator_height;
 
-        cairo_set_source_rgb(c, cl->frame.r, cl->frame.g, cl->frame.b);
+        cairo_set_source_rgba(c, cl->bg.r, cl->bg.g, cl->bg.b, 0);
         cairo_rectangle(c, bg_x, bg_y, bg_width, bg_height);
         cairo_fill(c);
+
+        if (settings.frame_width > 0) {
+                if (first && last) {
+                        cairo_new_sub_path (c);
+                        cairo_arc (c, bg_x + bg_width - settings.corner_radius, bg_y + settings.corner_radius, settings.corner_radius, -90 * degrees, 0 * degrees);
+                        cairo_arc (c, bg_x + bg_width - settings.corner_radius, bg_y + bg_height - settings.corner_radius, settings.corner_radius, 0 * degrees, 90 * degrees);
+                        cairo_arc (c, bg_x + settings.corner_radius, bg_y + bg_height - settings.corner_radius, settings.corner_radius, 90 * degrees, 180 * degrees);
+                        cairo_arc (c, bg_x + settings.corner_radius, bg_y + settings.corner_radius, settings.corner_radius, 180 * degrees, 270 * degrees);
+                        cairo_close_path (c);
+                } else if (first) {
+                        cairo_new_sub_path (c);
+                        cairo_arc (c, bg_x + bg_width - settings.corner_radius, bg_y + settings.corner_radius, settings.corner_radius, -90 * degrees, 0 * degrees);
+                        cairo_arc (c, bg_x + bg_width, bg_y + bg_height, 0, 0, 0);
+                        cairo_arc (c, bg_x, bg_y + bg_height, 0, 0, 0);
+                        cairo_arc (c, bg_x + settings.corner_radius, bg_y + settings.corner_radius, settings.corner_radius, 180 * degrees, 270 * degrees);
+                        cairo_close_path (c);
+                } else if (last) {
+                        cairo_new_sub_path (c);
+                        cairo_arc (c, bg_x + bg_width, bg_y, 0, 0, 0);
+                        cairo_arc (c, bg_x + bg_width - settings.corner_radius, bg_y + bg_height - settings.corner_radius, settings.corner_radius, 0 * degrees, 90 * degrees);
+                        cairo_arc (c, bg_x + settings.corner_radius, bg_y + bg_height - settings.corner_radius, settings.corner_radius, 90 * degrees, 180 * degrees);
+                        cairo_arc (c, bg_x, bg_y , 0, 180 * degrees, 270 * degrees);
+                        cairo_close_path (c);
+                } else {
+                        cairo_rectangle(c, bg_x, bg_y, bg_width, bg_height);
+                }
+
+                cairo_set_source_rgb(c, cl->frame.r, cl->frame.g, cl->frame.b);
+                cairo_fill(c);
+        }
 
         /* adding frame */
         bg_x += settings.frame_width;
@@ -606,7 +637,30 @@ static dimension_t x_render_layout(cairo_t *c, colored_layout *cl, colored_layou
                 bg_height -= settings.frame_width;
 
         cairo_set_source_rgb(c, cl->bg.r, cl->bg.g, cl->bg.b);
-        cairo_rectangle(c, bg_x, bg_y, bg_width, bg_height);
+        if (first && last) {
+                cairo_new_sub_path (c);
+                cairo_arc (c, bg_x + bg_width - settings.corner_radius, bg_y + settings.corner_radius, settings.corner_radius, -90 * degrees, 0 * degrees);
+                cairo_arc (c, bg_x + bg_width - settings.corner_radius, bg_y + bg_height - settings.corner_radius, settings.corner_radius, 0 * degrees, 90 * degrees);
+                cairo_arc (c, bg_x + settings.corner_radius, bg_y + bg_height - settings.corner_radius, settings.corner_radius, 90 * degrees, 180 * degrees);
+                cairo_arc (c, bg_x + settings.corner_radius, bg_y + settings.corner_radius, settings.corner_radius, 180 * degrees, 270 * degrees);
+                cairo_close_path (c);
+        } else if (first) {
+                cairo_new_sub_path (c);
+                cairo_arc (c, bg_x + bg_width - settings.corner_radius, bg_y + settings.corner_radius, settings.corner_radius, -90 * degrees, 0 * degrees);
+                cairo_arc (c, bg_x + bg_width, bg_y + bg_height, 0, 0, 0);
+                cairo_arc (c, bg_x, bg_y + bg_height, 0, 0, 0);
+                cairo_arc (c, bg_x + settings.corner_radius, bg_y + settings.corner_radius, settings.corner_radius, 180 * degrees, 270 * degrees);
+                cairo_close_path (c);
+        } else if (last) {
+                cairo_new_sub_path (c);
+                cairo_arc (c, bg_x + bg_width, bg_y, 0, 0, 0);
+                cairo_arc (c, bg_x + bg_width - settings.corner_radius, bg_y + bg_height - settings.corner_radius, settings.corner_radius, 0 * degrees, 90 * degrees);
+                cairo_arc (c, bg_x + settings.corner_radius, bg_y + bg_height - settings.corner_radius, settings.corner_radius, 90 * degrees, 180 * degrees);
+                cairo_arc (c, bg_x, bg_y , 0, 180 * degrees, 270 * degrees);
+                cairo_close_path (c);
+        } else {
+                cairo_rectangle(c, bg_x, bg_y, bg_width, bg_height);
+        }
         cairo_fill(c);
 
         bool use_padding = settings.notification_height <= (2 * settings.padding) + h;
