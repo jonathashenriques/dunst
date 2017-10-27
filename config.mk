@@ -22,18 +22,18 @@ pkg_config_packs := dbus-1 \
                     pangocairo \
                     x11 \
                     xinerama \
+                    xext \
                     xrandr \
-                    xscrnsaver \
-					xext
+                    xscrnsaver
 
 # check if we need libxdg-basedir
 ifeq (,$(findstring STATIC_CONFIG,$(CFLAGS)))
-	pkg_config_packs += libxdg-basedir
+    pkg_config_packs += libxdg-basedir
 else
 $(warning STATIC_CONFIG is deprecated behavior. It will get removed in future releases)
 endif
 
 # dunstify also needs libnotify
 ifneq (,$(findstring dunstify,${MAKECMDGOALS}))
-	pkg_config_packs += libnotify
+    pkg_config_packs += libnotify
 endif
