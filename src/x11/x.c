@@ -723,7 +723,6 @@ static dimension_t x_render_layout(cairo_t *c, colored_layout *cl, colored_layou
 
 void x_win_draw(void)
 {
-
         GSList *layouts = r_create_layouts(cairo_ctx.context);
 
         dimension_t dim = calculate_dimensions(layouts);
@@ -735,6 +734,7 @@ void x_win_draw(void)
         c = cairo_create(image_surface);
 
         x_win_move(width, height);
+
         cairo_xlib_surface_set_size(cairo_ctx.surface, width, height);
 
         cairo_move_to(c, 0, 0);
@@ -756,8 +756,6 @@ void x_win_draw(void)
         cairo_destroy(c);
         cairo_surface_destroy(image_surface);
         r_free_layouts(layouts);
-
-        x_win_round_corners();
 }
 
 static void x_win_move(int width, int height)
@@ -889,6 +887,8 @@ gboolean x_mainloop_fd_dispatch(GSource *source, GSourceFunc callback,
                 switch (ev.type) {
                 case Expose:
                         if (ev.xexpose.count == 0 && xctx.visible) {
+                                x_win_round_corners();
+
                                 x_win_draw();
                         }
                         break;
@@ -1070,7 +1070,6 @@ void x_setup(void)
         x_win_setup();
         x_cairo_setup();
         x_shortcut_grab(&settings.history_ks);
-
 }
 
 void x_win_round_corners(void)
@@ -1106,6 +1105,9 @@ void x_win_round_corners(void)
         XShapeCombineMask(xctx.dpy, xctx.win, ShapeBounding, 0, 0, mask, ShapeSet);
 
         XFreePixmap(xctx.dpy, mask);
+
+        XShapeSelectInput(xctx.dpy,
+                xctx.win, ShapeNotifyMask);
 }
 
 static void x_set_wm(Window win)
